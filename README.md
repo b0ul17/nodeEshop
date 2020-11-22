@@ -12,7 +12,7 @@ $ npm install
 $ npm start
 ```
 
-## MSQL Database
+## MYSQL Database
 ```bash
   A .env file needs to be created with the variables
   DB_DATABASE,
