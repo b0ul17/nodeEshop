@@ -13,10 +13,5 @@ $ npm start
 ```
 
 ## MYSQL Database
-```bash
-  A .env file needs to be created with the variables
-  DB_DATABASE,
-	DB_USERNAME,
-	DB_PASSWORD,
-  for the connection with DB.
-```
+  A .env file needs to be created with the variables DB_DATABASE, DB_USERNAME, DB_PASSWORD,for the connection with DB.
+
