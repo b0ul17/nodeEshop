@@ -1,5 +1,4 @@
 const Product = require("../models/product");
-const Cart = require("../models/cart");
 
 exports.getProducts = (req, res, next) => {
 	Product.findAll()
@@ -120,16 +119,56 @@ exports.postCartDeleteProduct = (req, res, next) => {
 		.catch((err) => console.log(err));
 };
 
-exports.getOrders = (req, res, next) => {
-	res.render("shop/orders", {
-		path: "/orders",
-		pageTitle: "Your Orders",
-	});
+exports.postOrder = (req, res, next) => {
+	let fetchedCart;
+	req.user
+		.getCart()
+		.then((cart) => {
+			fetchedCart = cart;
+			return cart.getProducts();
+		})
+		.then((products) => {
+			return req.user
+				.createOrder()
+				.then((order) => {
+					return order.addProducts(
+						products.map((product) => {
+							// this property name must be the same name
+							// that has been defined in sequelize on ored-item.js model on const OrderItem
+							product.orderItem = { quantity: product.cartItem.quantity };
+							return product;
+						})
+					);
+				})
+				.catch((err) => {
+					console.log(err);
+				});
+		})
+		.then((result) => {
+			return fetchedCart.setProducts(null);
+		})
+		.then((result) => {
+			res.redirect("/orders");
+		})
+		.catch((err) => {
+			console.log(err);
+		});
 };
 
-exports.getCheckout = (req, res, next) => {
-	res.render("shop/checkout", {
-		path: "/checkout",
-		pageTitle: "Checkout",
-	});
+exports.getOrders = (req, res, next) => {
+	req.user
+		// as we have set the relation between orders and products
+		//on app.js line 49 , we are passing an object on getOrders method
+		// to request to include the products that are related on the order due to relation
+		.getOrders({ include: ["products"] })
+		.then((orders) => {
+			res.render("shop/orders", {
+				path: "/orders",
+				pageTitle: "Your Orders",
+				orders: orders,
+			});
+		})
+		.catch((err) => {
+			console.log(err);
+		});
 };
